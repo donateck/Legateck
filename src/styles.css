@@ -1,0 +1,118 @@
+@import "tailwindcss" source(none);
+@source "../src";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-gold: var(--gold);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+:root {
+  /* Legateck — corporate deep navy + gold accent (dark by default) */
+  --radius: 0.625rem;
+
+  --background: oklch(0.16 0.03 250);
+  --foreground: oklch(0.96 0.01 250);
+
+  --card: oklch(0.20 0.035 252);
+  --card-foreground: oklch(0.96 0.01 250);
+
+  --popover: oklch(0.21 0.035 252);
+  --popover-foreground: oklch(0.96 0.01 250);
+
+  --primary: oklch(0.78 0.12 78);   /* warm gold */
+  --primary-foreground: oklch(0.18 0.03 250);
+
+  --secondary: oklch(0.26 0.04 252);
+  --secondary-foreground: oklch(0.95 0.01 250);
+
+  --muted: oklch(0.24 0.03 252);
+  --muted-foreground: oklch(0.70 0.02 250);
+
+  --accent: oklch(0.30 0.05 252);
+  --accent-foreground: oklch(0.96 0.01 250);
+
+  --destructive: oklch(0.62 0.20 25);
+  --destructive-foreground: oklch(0.98 0 0);
+
+  --border: oklch(0.30 0.03 252 / 60%);
+  --input: oklch(0.26 0.03 252);
+  --ring: oklch(0.78 0.12 78);
+
+  --gold: oklch(0.78 0.12 78);
+
+  --sidebar: oklch(0.13 0.03 252);
+  --sidebar-foreground: oklch(0.90 0.01 250);
+  --sidebar-primary: oklch(0.78 0.12 78);
+  --sidebar-primary-foreground: oklch(0.16 0.03 252);
+  --sidebar-accent: oklch(0.22 0.035 252);
+  --sidebar-accent-foreground: oklch(0.95 0.01 250);
+  --sidebar-border: oklch(0.26 0.03 252 / 80%);
+  --sidebar-ring: oklch(0.78 0.12 78);
+
+  --gradient-hero: linear-gradient(135deg, oklch(0.18 0.04 252), oklch(0.13 0.03 252));
+  --gradient-gold: linear-gradient(135deg, oklch(0.82 0.13 82), oklch(0.72 0.13 70));
+  --shadow-elegant: 0 20px 60px -20px oklch(0 0 0 / 0.6);
+  --shadow-glow: 0 0 40px -10px oklch(0.78 0.12 78 / 0.35);
+}
+
+.dark {
+  /* Same as root — the app is dark-first */
+  --background: oklch(0.16 0.03 250);
+  --foreground: oklch(0.96 0.01 250);
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+  html, body, #root {
+    height: 100%;
+  }
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-feature-settings: "cv11", "ss01";
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+@layer utilities {
+  .bg-gradient-hero { background-image: var(--gradient-hero); }
+  .bg-gradient-gold { background-image: var(--gradient-gold); }
+  .shadow-elegant { box-shadow: var(--shadow-elegant); }
+  .shadow-glow { box-shadow: var(--shadow-glow); }
+  .text-gold { color: var(--gold); }
+}
