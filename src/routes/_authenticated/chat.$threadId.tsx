@@ -19,18 +19,34 @@ function ChatPage() {
   });
 
   if (isLoading) {
-    return <div className="flex h-full items-center justify-center text-muted-foreground text-sm">Cargando consulta...</div>;
+    return (
+      <div className="flex h-full items-center justify-center text-muted-foreground text-sm">
+        Cargando consulta...
+      </div>
+    );
   }
   if (!data) {
-    return <div className="flex h-full items-center justify-center text-muted-foreground">Consulta no encontrada.</div>;
+    return (
+      <div className="flex h-full items-center justify-center text-muted-foreground">
+        Consulta no encontrada.
+      </div>
+    );
   }
+
+  const chatType: "consulta" | "accion" =
+    (data.thread as any).chat_type === "accion" ? "accion" : "consulta";
 
   return (
     <ChatWindow
       key={threadId}
       threadId={threadId}
       title={data.thread.title}
-      initialMessages={(data.messages as any[]).map((m) => ({ id: m.id, role: m.role, parts: m.parts }))}
+      chatType={chatType}
+      initialMessages={(data.messages as any[]).map((m) => ({
+        id: m.id,
+        role: m.role,
+        parts: m.parts,
+      }))}
       onTitleMaybeChanged={() => qc.invalidateQueries({ queryKey: ["threads"] })}
     />
   );

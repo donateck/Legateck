@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Paperclip, Send, FileText, Loader2, X, Scale, Users, Building2, Gavel, Sparkles, Lock, ShieldCheck, UserCheck, Scale as ScaleIcon } from "lucide-react";
+import { Paperclip, Send, FileText, Loader2, X, Scale, Users, Building2, Gavel, Sparkles, Lock, ShieldCheck, UserCheck, Scale as ScaleIcon, FilePlus2, FileEdit } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -91,11 +91,13 @@ function encodeJsonBodyAsUtf8(body: string): BodyInit {
 export function ChatWindow({
   threadId,
   title,
+  chatType = "consulta",
   initialMessages,
   onTitleMaybeChanged,
 }: {
   threadId: string;
   title: string;
+  chatType?: "consulta" | "accion";
   initialMessages: UIMessage[];
   onTitleMaybeChanged?: () => void;
 }) {
@@ -110,6 +112,16 @@ export function ChatWindow({
     return localStorage.getItem(`legateck:role:${threadId}`);
   });
   const [pendingSubmit, setPendingSubmit] = useState<null | { text: string; attachments: PendingAttachment[] }>(null);
+
+  // Subtype de acción (generar | revisar) — guardado en localStorage al crear el hilo
+  const [accionSubtype] = useState<"generar" | "revisar" | null>(() => {
+    if (typeof window === "undefined") return null;
+    const v = localStorage.getItem(`legateck:accion_subtype:${threadId}`);
+    return v === "generar" || v === "revisar" ? v : null;
+  });
+
+  const chatTypeRef = useRef(chatType);
+  chatTypeRef.current = chatType;
   const fetchCredits = useServerFn(getMyCredits);
   const genRedline = useServerFn(generateRedlinePreview);
   const detectParties = useServerFn(detectContractParties);
@@ -147,7 +159,7 @@ export function ChatWindow({
     () =>
       new DefaultChatTransport({
         api: "/api/chat",
-        body: () => ({ threadId, mode: modeRef.current, role: roleRef.current }),
+        body: () => ({ threadId, mode: modeRef.current, role: roleRef.current, chat_type: chatTypeRef.current }),
         prepareSendMessagesRequest: ({ id, messages, body, trigger, messageId }) => ({
           body: sanitizeChatPayload({
             ...body,
@@ -300,7 +312,10 @@ export function ChatWindow({
         </div>
         <div className="min-w-0 flex-1">
           <h1 className="truncate font-semibold tracking-tight">{title}</h1>
-          <p className="text-xs text-muted-foreground">Legateck AI · {currentMode.label}</p>
+          <p className="text-xs text-muted-foreground">
+            Legateck AI ·{" "}
+            {chatType === "accion" ? "Gestor de Contratos" : currentMode.label}
+          </p>
         </div>
         {selectedRole && (
           <div className="hidden lg:flex items-center gap-1.5 rounded-md border border-gold/40 bg-gold/5 px-2 py-1 text-[11px] text-gold">
@@ -339,7 +354,11 @@ export function ChatWindow({
       {/* Messages */}
       <ScrollArea className="flex-1">
         <div ref={scrollRef} className="mx-auto max-w-3xl px-4 lg:px-6 py-8 space-y-6">
-          {messages.length === 0 && <EmptyState mode={mode} setMode={setMode} />}
+          {messages.length === 0 && (
+            chatType === "accion"
+              ? <AccionEmptyState subtype={accionSubtype} onFileClick={() => fileInputRef.current?.click()} />
+              : <EmptyState mode={mode} setMode={setMode} />
+          )}
           {messages.map((m) => (
             <MessageBubble key={m.id} message={m} />
           ))}
@@ -492,6 +511,73 @@ export function ChatWindow({
             Legateck puede cometer errores. Verifique referencias legales clave.
           </p>
         </div>
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Pantalla inicial para hilos de ACCIONES
+// ─────────────────────────────────────────────────────────────────────────────
+function AccionEmptyState({
+  subtype,
+  onFileClick,
+}: {
+  subtype: "generar" | "revisar" | null;
+  onFileClick: () => void;
+}) {
+  if (subtype === "revisar") {
+    return (
+      <div className="text-center py-12 space-y-6">
+        <div className="mx-auto h-12 w-12 rounded-full bg-gradient-gold flex items-center justify-center shadow-glow">
+          <FileEdit className="h-6 w-6 text-primary-foreground" />
+        </div>
+        <div className="space-y-2">
+          <h2 className="text-xl font-semibold tracking-tight">Revisar / Editar contrato</h2>
+          <p className="text-sm text-muted-foreground max-w-md mx-auto">
+            Adjunte el contrato a revisar (PDF, Word o TXT) y describa qué aspectos desea auditar o mejorar.
+            La IA analizará cada cláusula bajo las leyes de la República de Panamá.
+          </p>
+        </div>
+        <Button
+          type="button"
+          onClick={onFileClick}
+          className="bg-gradient-gold text-primary-foreground hover:opacity-95 shadow-glow"
+        >
+          <Paperclip className="h-4 w-4 mr-2" />
+          Cargar contrato
+        </Button>
+        <p className="text-xs text-muted-foreground">Soporta PDF · Word · TXT · Imagen</p>
+      </div>
+    );
+  }
+
+  // subtype === "generar" o null
+  return (
+    <div className="text-center py-12 space-y-6">
+      <div className="mx-auto h-12 w-12 rounded-full bg-gradient-gold flex items-center justify-center shadow-glow">
+        <FilePlus2 className="h-6 w-6 text-primary-foreground" />
+      </div>
+      <div className="space-y-2">
+        <h2 className="text-xl font-semibold tracking-tight">Generar contrato nuevo</h2>
+        <p className="text-sm text-muted-foreground max-w-md mx-auto">
+          Describa el tipo de contrato que necesita, las partes involucradas y las condiciones
+          principales. La IA redactará cada cláusula bajo el Código Civil, Comercial y laboral
+          de Panamá.
+        </p>
+      </div>
+      <div className="grid sm:grid-cols-2 gap-3 max-w-lg mx-auto text-left">
+        {[
+          { label: "Tipo de contrato", example: "Ej: Contrato de arrendamiento, NDA, servicios..." },
+          { label: "Partes involucradas", example: "Ej: Empresa X (arrendador) y Juan Pérez (arrendatario)" },
+          { label: "Condiciones clave", example: "Ej: Monto, plazo, penalidades, exclusividad..." },
+          { label: "Jurisdicción", example: "Ej: Ciudad de Panamá, República de Panamá" },
+        ].map((tip) => (
+          <div key={tip.label} className="rounded-lg border border-border/60 bg-card/40 p-3">
+            <div className="text-xs font-semibold mb-0.5">{tip.label}</div>
+            <div className="text-xs text-muted-foreground">{tip.example}</div>
+          </div>
+        ))}
       </div>
     </div>
   );

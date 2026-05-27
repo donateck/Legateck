@@ -44,6 +44,42 @@ export type Database = {
         }
         Relationships: []
       }
+      contracts: {
+        Row: {
+          id: string
+          user_id: string
+          client_name: string
+          contract_theme: string
+          contract_text: string | null
+          file_path: string | null
+          status: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          client_name: string
+          contract_theme: string
+          contract_text?: string | null
+          file_path?: string | null
+          status?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          client_name?: string
+          contract_theme?: string
+          contract_text?: string | null
+          file_path?: string | null
+          status?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       contract_redlines: {
         Row: {
           clean_markdown: string
@@ -192,6 +228,7 @@ export type Database = {
       }
       threads: {
         Row: {
+          chat_type: string
           created_at: string
           id: string
           locked_document_id: string | null
@@ -202,6 +239,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          chat_type?: string
           created_at?: string
           id?: string
           locked_document_id?: string | null
@@ -212,6 +250,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          chat_type?: string
           created_at?: string
           id?: string
           locked_document_id?: string | null
